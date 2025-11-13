@@ -1,5 +1,6 @@
 import random
 
+
 def title_screen():
     print("Welcome to Simple RPG!")
     print("1. Start Game")
@@ -10,6 +11,7 @@ def title_screen():
     else:
         print("Thanks for playing!")
 
+
 def display_battle_scene(player, enemy):
     # Display a simple battle scene reminiscent of classic RPGs (e.g., FF3)
     print("\n===== Battle Scene =====")
@@ -18,10 +20,11 @@ def display_battle_scene(player, enemy):
     # ASCII characters representing characters
     print("   O            O")
     print("  /|\\          /|\\")
-    print("  / \\          / \")
+    print("  / \\          / \\ ")
     # HP display
     print(f"{player['hp']} HP         {enemy['hp']} HP")
     print("========================")
+
 
 def start_game():
     player = {'name': '', 'hp': 100, 'attack': 10, 'heal': 10}
@@ -43,8 +46,9 @@ def start_game():
 
     print("\nCongratulations! You defeated all enemies and completed the adventure.")
 
+
 def battle(player, enemy):
-    # Show initial battle scene
+    # Show battle scene each turn while both are alive
     while enemy['hp'] > 0 and player['hp'] > 0:
         # Display battle scene each turn
         display_battle_scene(player, enemy)
@@ -77,6 +81,7 @@ def battle(player, enemy):
         print(f"You defeated the {enemy['name']}!")
     else:
         print("You have been defeated in battle...")
+
 
 if __name__ == '__main__':
     title_screen()
