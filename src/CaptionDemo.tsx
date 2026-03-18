@@ -25,6 +25,9 @@ const VOICEOVER_FILES = [
   "voiceover/scene_003.wav",
 ];
 
+// 音声ファイルを有効にするには VOICEVOX で生成後 true にする
+const ENABLE_AUDIO = false;
+
 export const CaptionDemo: React.FC = () => {
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -73,21 +76,22 @@ export const CaptionDemo: React.FC = () => {
       </Sequence>
 
       {/* VOICEVOX audio tracks - play after chapter title */}
-      <Sequence from={captionOffset} durationInFrames={durationInFrames - captionOffset}>
-        {VOICEOVER_FILES.map((file, i) => {
-          // Each audio file starts at the corresponding caption group's start time
-          const groupCaptions = getSceneCaptions(captions, i);
-          const startFrame = groupCaptions.length > 0
-            ? Math.round((groupCaptions[0].startMs / 1000) * fps)
-            : 0;
+      {ENABLE_AUDIO && (
+        <Sequence from={captionOffset} durationInFrames={durationInFrames - captionOffset}>
+          {VOICEOVER_FILES.map((file, i) => {
+            const groupCaptions = getSceneCaptions(captions, i);
+            const startFrame = groupCaptions.length > 0
+              ? Math.round((groupCaptions[0].startMs / 1000) * fps)
+              : 0;
 
-          return (
-            <Sequence key={i} from={startFrame}>
-              <Audio src={staticFile(file)} volume={1} />
-            </Sequence>
-          );
-        })}
-      </Sequence>
+            return (
+              <Sequence key={i} from={startFrame}>
+                <Audio src={staticFile(file)} volume={1} />
+              </Sequence>
+            );
+          })}
+        </Sequence>
+      )}
 
       {/* TikTok-style captions overlay */}
       <Sequence from={captionOffset} durationInFrames={durationInFrames - captionOffset}>

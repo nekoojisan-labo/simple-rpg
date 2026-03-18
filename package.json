@@ -8,7 +8,7 @@
     "render": "npx remotion render src/index.tsx RpgIntroVideo out/video.mp4"
   },
   "dependencies": {
-    "@remotion/captions": "^4.0.436",
+    "@remotion/captions": "4.0.242",
     "@remotion/cli": "4.0.242",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
