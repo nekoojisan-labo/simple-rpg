@@ -1,0 +1,18 @@
+[
+  {
+    "text": "Claude Codeで動画編集ができるって、知ってた？",
+    "output": "public/voiceover/scene_000.wav"
+  },
+  {
+    "text": "Remotionを使えば、コードだけで字幕も自動生成できるんだよ！",
+    "output": "public/voiceover/scene_001.wav"
+  },
+  {
+    "text": "キーワードの強調表示もできちゃいます！",
+    "output": "public/voiceover/scene_002.wav"
+  },
+  {
+    "text": "再現性が100パーセント！同じコードで同じ動画が作れるの！",
+    "output": "public/voiceover/scene_003.wav"
+  }
+]

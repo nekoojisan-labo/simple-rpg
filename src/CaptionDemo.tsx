@@ -1,9 +1,10 @@
 import React from "react";
 import {
   AbsoluteFill,
+  Audio,
   Sequence,
-  useVideoConfig,
   staticFile,
+  useVideoConfig,
 } from "remotion";
 import { createTikTokStyleCaptions } from "@remotion/captions";
 import type { Caption } from "@remotion/captions";
@@ -15,19 +16,25 @@ import captionsData from "../public/captions.json";
 
 const captions: Caption[] = captionsData as Caption[];
 
+// VOICEVOX で生成した音声ファイル一覧
+// scripts/voicevox-generate.py --scenes scripts/scenes.json で生成
+const VOICEOVER_FILES = [
+  "voiceover/scene_000.wav",
+  "voiceover/scene_001.wav",
+  "voiceover/scene_002.wav",
+  "voiceover/scene_003.wav",
+];
+
 export const CaptionDemo: React.FC = () => {
-  const { fps } = useVideoConfig();
+  const { fps, durationInFrames } = useVideoConfig();
 
   const { pages } = createTikTokStyleCaptions({
     captions,
     combineTokensWithinMilliseconds: 2000,
   });
 
-  const totalFrames = useVideoConfig().durationInFrames;
-
   // Chapter title takes the first 2 seconds (60 frames)
   const chapterDuration = 60;
-  // Captions start after chapter title
   const captionOffset = chapterDuration;
 
   return (
@@ -42,7 +49,7 @@ export const CaptionDemo: React.FC = () => {
       </Sequence>
 
       {/* Main content background after chapter */}
-      <Sequence from={captionOffset} durationInFrames={totalFrames - captionOffset}>
+      <Sequence from={captionOffset} durationInFrames={durationInFrames - captionOffset}>
         <AbsoluteFill
           style={{
             background: "linear-gradient(180deg, #0f0f1a 0%, #1a1028 50%, #0f0f1a 100%)",
@@ -51,7 +58,6 @@ export const CaptionDemo: React.FC = () => {
             fontFamily: "'Zen Kaku Gothic New', sans-serif",
           }}
         >
-          {/* Center content area */}
           <div
             style={{
               fontSize: 42,
@@ -66,15 +72,32 @@ export const CaptionDemo: React.FC = () => {
         </AbsoluteFill>
       </Sequence>
 
+      {/* VOICEVOX audio tracks - play after chapter title */}
+      <Sequence from={captionOffset} durationInFrames={durationInFrames - captionOffset}>
+        {VOICEOVER_FILES.map((file, i) => {
+          // Each audio file starts at the corresponding caption group's start time
+          const groupCaptions = getSceneCaptions(captions, i);
+          const startFrame = groupCaptions.length > 0
+            ? Math.round((groupCaptions[0].startMs / 1000) * fps)
+            : 0;
+
+          return (
+            <Sequence key={i} from={startFrame}>
+              <Audio src={staticFile(file)} volume={1} />
+            </Sequence>
+          );
+        })}
+      </Sequence>
+
       {/* TikTok-style captions overlay */}
-      <Sequence from={captionOffset} durationInFrames={totalFrames - captionOffset}>
+      <Sequence from={captionOffset} durationInFrames={durationInFrames - captionOffset}>
         <AbsoluteFill>
           {pages.map((page, index) => {
             const nextPage = pages[index + 1];
             const startFrame = Math.round((page.startMs / 1000) * fps);
             const endFrame = nextPage
               ? Math.round((nextPage.startMs / 1000) * fps)
-              : totalFrames - captionOffset;
+              : durationInFrames - captionOffset;
 
             return (
               <Sequence
@@ -91,3 +114,27 @@ export const CaptionDemo: React.FC = () => {
     </AbsoluteFill>
   );
 };
+
+/**
+ * キャプションをシーン（音声ファイル）ごとにグループ分けする。
+ * scenes.json の区切りに合わせて、大きなギャップで分割する。
+ */
+function getSceneCaptions(allCaptions: Caption[], sceneIndex: number): Caption[] {
+  const GAP_THRESHOLD_MS = 250;
+  const groups: Caption[][] = [];
+  let current: Caption[] = [];
+
+  for (const cap of allCaptions) {
+    if (current.length > 0) {
+      const prev = current[current.length - 1];
+      if (cap.startMs - prev.endMs > GAP_THRESHOLD_MS) {
+        groups.push(current);
+        current = [];
+      }
+    }
+    current.push(cap);
+  }
+  if (current.length > 0) groups.push(current);
+
+  return groups[sceneIndex] ?? [];
+}
